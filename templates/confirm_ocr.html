@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Title - BookRecommender</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .navbar { background: white; padding: 15px 30px; }
+        .nav-brand { font-size: 24px; font-weight: bold; color: #667eea; text-decoration: none; }
+        .container { max-width: 700px; margin: 0 auto; padding: 40px 20px; }
+        .confirm-card { background: white; border-radius: 15px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        h1 { color: #333; margin-bottom: 10px; }
+        .subtitle { color: #666; margin-bottom: 30px; }
+        .detected-box { background: #f0f4ff; border: 2px solid #667eea; border-radius: 10px; padding: 20px; margin-bottom: 30px; text-align: center; }
+        .detected-label { font-size: 14px; color: #666; margin-bottom: 8px; }
+        .detected-text { font-size: 28px; font-weight: bold; color: #333; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; }
+        .form-group input { width: 100%; padding: 15px; font-size: 18px; border: 2px solid #ddd; border-radius: 8px; }
+        .form-group input:focus { outline: none; border-color: #667eea; }
+        .candidates { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; }
+        .candidate-btn { background: #f0f0f0; border: 1px solid #ddd; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+        .candidate-btn:hover { background: #667eea; color: white; }
+        .btn { width: 100%; padding: 15px; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); }
+        .btn-secondary { background: #6c757d; color: white; margin-top: 15px; }
+        .info-note { margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px; color: #856404; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar"><a href="/" class="nav-brand">📚 BookRecommender</a></nav>
+
+    <main class="container">
+        <div class="confirm-card">
+            <h1>📷 Confirm Book Title</h1>
+            <p class="subtitle">Review and edit the text detected from your image</p>
+            
+            {% if detected %}
+            <div class="detected-box">
+                <div class="detected-label">DETECTED TEXT</div>
+                <div class="detected-text">{{ detected }}</div>
+            </div>
+            {% endif %}
+            
+            <form action="/recommend/confirm" method="POST">
+                <div class="form-group">
+                    <label for="book_title">Book Title (Edit if needed)</label>
+                    <input type="text" id="book_title" name="book_title" value="{{ detected }}" required autofocus>
+                </div>
+                
+                {% if candidates and candidates|length > 1 %}
+                <div style="margin-bottom:20px;">
+                    <label style="color:#666;">Other detected text:</label>
+                    <div class="candidates">
+                        {% for c in candidates %}
+                        {% if c != detected %}
+                        <button type="button" class="candidate-btn" onclick="document.getElementById('book_title').value='{{ c }}'">{{ c }}</button>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <button type="submit" class="btn btn-primary">🔍 Search This Book</button>
+            </form>
+            
+            <a href="/"><button class="btn btn-secondary">← Cancel & Go Back</button></a>
+            
+            <div class="info-note">💡 <strong>Tip:</strong> Edit the text if OCR made mistakes, or try uploading a clearer photo.</div>
+        </div>
+    </main>
+
+    <script>
+        window.onload = function() {
+            var input = document.getElementById('book_title');
+            input.focus();
+            input.select();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ book.title }} - BookRecommender</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f4f2ee; min-height: 100vh; }
+        .header { background: #382110; padding: 12px 0; position: sticky; top: 0; z-index: 100; }
+        .header-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; }
+        .logo { display: flex; align-items: center; gap: 10px; color: white; text-decoration: none; }
+        .logo i { font-size: 28px; color: #F4D03F; }
+        .logo span { font-size: 22px; font-weight: 600; }
+        .nav-links { display: flex; gap: 24px; }
+        .nav-links a { color: #d4c5b5; text-decoration: none; font-size: 14px; font-weight: 500; }
+        .nav-links a:hover { color: white; }
+        .main-container { max-width: 900px; margin: 0 auto; padding: 30px 20px; }
+        .result-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden; }
+        .book-header { display: flex; gap: 30px; padding: 30px; background: linear-gradient(135deg, #faf8f6 0%, #f4f2ee 100%); border-bottom: 1px solid #e8e8e8; }
+        .book-thumbnail { width: 160px; height: 240px; background: #e8e8e8; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); flex-shrink: 0; }
+        .book-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+        .book-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .book-title { font-size: 28px; font-weight: 700; color: #382110; margin-bottom: 8px; }
+        .book-author { font-size: 18px; color: #555; margin-bottom: 15px; }
+        .book-meta { display: flex; flex-wrap: wrap; gap: 15px; font-size: 14px; color: #777; }
+        .recommendation-box { padding: 30px; text-align: center; border-bottom: 1px solid #e8e8e8; }
+        .rec-label { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; color: #999; margin-bottom: 8px; }
+        .rec-value { font-size: 64px; font-weight: 800; margin-bottom: 5px; }
+        .rec-buy { color: #2e7d32; }
+        .rec-try { color: #e65100; }
+        .rec-skip { color: #c62828; }
+        .rec-confidence { font-size: 16px; color: #666; margin-bottom: 20px; }
+        .probability-bars { max-width: 400px; margin: 0 auto; }
+        .prob-item { display: flex; align-items: center; margin-bottom: 10px; }
+        .prob-label { width: 50px; font-weight: 600; font-size: 14px; }
+        .prob-bar-container { flex: 1; height: 24px; background: #e8e8e8; border-radius: 12px; margin: 0 15px; overflow: hidden; }
+        .prob-bar { height: 100%; border-radius: 12px; transition: width 0.5s; }
+        .prob-bar.buy { background: #2e7d32; }
+        .prob-bar.try { background: #e65100; }
+        .prob-bar.skip { background: #c62828; }
+        .prob-percent { width: 50px; text-align: right; font-weight: 600; font-size: 14px; }
+        .book-description { padding: 30px; border-bottom: 1px solid #e8e8e8; }
+        .section-title { font-size: 18px; font-weight: 600; color: #382110; margin-bottom: 15px; }
+        .description-text { line-height: 1.7; color: #444; font-size: 15px; }
+        .action-buttons { display: flex; gap: 15px; padding: 30px; }
+        .btn { flex: 1; padding: 14px 20px; border-radius: 30px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s; text-align: center; border: none; }
+        .btn-primary { background: #409D69; color: white; }
+        .btn-primary:hover { background: #2d7a4e; }
+        .btn-secondary { background: #382110; color: white; }
+        .btn-secondary:hover { background: #5c3a21; }
+        .btn-outline { background: white; color: #382110; border: 1px solid #d4c5b5; }
+        .btn-outline:hover { background: #f4f2ee; }
+        .rating-section { padding: 0 30px 30px 30px; text-align: center; }
+        .rating-title { font-size: 16px; color: #666; margin-bottom: 15px; }
+        .stars { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
+        .star-btn { background: white; border: 2px solid #d4c5b5; font-size: 28px; width: 55px; height: 55px; border-radius: 50%; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+        .star-btn:hover { border-color: #F4D03F; background: #fff8e1; }
+        .star-btn.selected { background: #F4D03F; border-color: #F4D03F; }
+        .submit-rating { background: #382110; color: white; border: none; padding: 12px 30px; border-radius: 30px; font-weight: 600; font-size: 15px; cursor: pointer; }
+        .submit-rating:hover { background: #5c3a21; }
+        .ocr-info { margin: 20px 30px; padding: 15px; background: #e3f2fd; border-radius: 10px; font-size: 14px; color: #1565c0; }
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #666; text-decoration: none; }
+        .back-link:hover { color: #382110; }
+        .footer { text-align: center; padding: 20px; color: #999; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <a href="/" class="logo"><i class="fas fa-book-open"></i><span>BookRecommender</span></a>
+            <div class="nav-links">
+                <a href="/"><i class="fas fa-home"></i> Home</a>
+                <a href="/history"><i class="fas fa-chart-bar"></i> History</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="result-card">
+            <div class="book-header">
+                <div class="book-thumbnail">
+                    {% if book.thumbnail %}
+                        <img src="{{ book.thumbnail }}" alt="{{ book.title }}" onerror="this.parentElement.innerHTML='<div style=\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#382110;color:#F4D03F;font-size:48px;\'>📖</div>'">
+                    {% else %}
+                        <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#382110;color:#F4D03F;font-size:48px;">📖</div>
+                    {% endif %}
+                </div>
+                <div class="book-info">
+                    <h1 class="book-title">{{ book.title }}</h1>
+                    <p class="book-author">by {{ book.authors|join(', ') if book.authors is iterable and book.authors is not string else book.authors }}</p>
+                    <div class="book-meta">
+                        {% if book.categories %}<span><i class="fas fa-tag"></i> {{ book.categories[:2]|join(', ') }}</span>{% endif %}
+                        {% if book.published_date %}<span><i class="fas fa-calendar"></i> {{ book.published_date }}</span>{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="recommendation-box">
+                <div class="rec-label">Our Recommendation</div>
+                <div class="rec-value rec-{{ recommendation|lower }}">{{ recommendation }}</div>
+                <div class="rec-confidence">{{ confidence }} confidence</div>
+                {% if probabilities %}
+                <div class="probability-bars">
+                    <div class="prob-item"><span class="prob-label">BUY</span><div class="prob-bar-container"><div class="prob-bar buy" style="width:{{ probabilities.BUY*100 }}%"></div></div><span class="prob-percent">{{ "%.0f"|format(probabilities.BUY*100) }}%</span></div>
+                    <div class="prob-item"><span class="prob-label">TRY</span><div class="prob-bar-container"><div class="prob-bar try" style="width:{{ probabilities.TRY*100 }}%"></div></div><span class="prob-percent">{{ "%.0f"|format(probabilities.TRY*100) }}%</span></div>
+                    <div class="prob-item"><span class="prob-label">SKIP</span><div class="prob-bar-container"><div class="prob-bar skip" style="width:{{ probabilities.SKIP*100 }}%"></div></div><span class="prob-percent">{{ "%.0f"|format(probabilities.SKIP*100) }}%</span></div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="alert('📚 Added to Want to Read!')"><i class="fas fa-bookmark"></i> Want to Read</button>
+                <button class="btn btn-outline" onclick="alert('📂 Added to shelf!')"><i class="fas fa-plus"></i> Add to Shelf</button>
+            </div>
+
+            {% if book.description %}
+            <div class="book-description">
+                <div class="section-title"><i class="fas fa-align-left"></i> Description</div>
+                <div class="description-text">{{ book.description }}</div>
+            </div>
+            {% endif %}
+
+            {% if ocr_text %}
+            <div class="ocr-info"><i class="fas fa-camera"></i> OCR detected: <strong>{{ ocr_text }}</strong></div>
+            {% endif %}
+
+            <div class="rating-section">
+                <div class="rating-title">Rate this book to improve recommendations</div>
+                <form action="/feedback/rate" method="POST">
+                    <input type="hidden" name="book_title" value="{{ book.title }}">
+                    <input type="hidden" name="rating" id="rating-input" value="">
+                    <div class="stars">
+                        <button type="button" class="star-btn" onclick="selectRating(1)">1</button>
+                        <button type="button" class="star-btn" onclick="selectRating(2)">2</button>
+                        <button type="button" class="star-btn" onclick="selectRating(3)">3</button>
+                        <button type="button" class="star-btn" onclick="selectRating(4)">4</button>
+                        <button type="button" class="star-btn" onclick="selectRating(5)">5</button>
+                    </div>
+                    <button type="submit" class="submit-rating"><i class="fas fa-star"></i> Submit Rating</button>
+                </form>
+            </div>
+        </div>
+
+        <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Back to Search</a>
+        <div class="footer">© 2024 BookRecommender</div>
+    </div>
+
+    <script>
+        function selectRating(r) {
+            document.getElementById('rating-input').value = r;
+            document.querySelectorAll('.star-btn').forEach((b,i) => { if(i<r) b.classList.add('selected'); else b.classList.remove('selected'); });
+        }
+    </script>
+</body>
+</html>

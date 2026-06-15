@@ -1,0 +1,10 @@
+Flask==3.0.0
+flask-wtf
+requests
+python-dotenv
+nltk
+Pillow
+pandas
+scikit-learn
+pytesseract
+opencv-python

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading History - BookRecommender</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f4f2ee; min-height: 100vh; }
+        .header { background: #382110; padding: 12px 0; }
+        .header-container { max-width: 1000px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; }
+        .logo { display: flex; align-items: center; gap: 10px; color: white; text-decoration: none; }
+        .logo i { font-size: 28px; color: #F4D03F; }
+        .logo span { font-size: 22px; font-weight: 600; }
+        .nav-links a { color: #d4c5b5; text-decoration: none; font-size: 14px; margin-left: 20px; }
+        .nav-links a:hover { color: white; }
+        .main-container { max-width: 1000px; margin: 0 auto; padding: 30px 20px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .page-header h1 { font-size: 28px; color: #382110; }
+        .stats-cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .stat-number { font-size: 32px; font-weight: 700; color: #382110; }
+        .stat-label { font-size: 13px; color: #666; }
+        .history-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden; }
+        .history-table { width: 100%; border-collapse: collapse; }
+        .history-table th { text-align: left; padding: 16px 24px; background: #fafafa; font-size: 13px; font-weight: 600; color: #666; border-bottom: 1px solid #e8e8e8; }
+        .history-table td { padding: 16px 24px; border-bottom: 1px solid #f0f0f0; }
+        .book-title { font-weight: 600; color: #382110; }
+        .stars { color: #F4D03F; letter-spacing: 2px; }
+        .category-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge-buy { background: #e8f5e9; color: #2e7d32; }
+        .badge-try { background: #fff3e0; color: #e65100; }
+        .badge-skip { background: #ffebee; color: #c62828; }
+        .empty-state { text-align: center; padding: 60px; }
+        .empty-icon { font-size: 64px; color: #d4c5b5; margin-bottom: 20px; }
+        .empty-state h3 { font-size: 20px; color: #382110; margin-bottom: 8px; }
+        .empty-state p { color: #666; margin-bottom: 24px; }
+        .btn { display: inline-block; padding: 12px 28px; background: #382110; color: white; text-decoration: none; border-radius: 30px; font-weight: 500; }
+        .btn:hover { background: #5c3a21; }
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #666; text-decoration: none; }
+        .back-link:hover { color: #382110; }
+        .date-text { font-size: 13px; color: #999; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <a href="/" class="logo"><i class="fas fa-book-open"></i><span>BookRecommender</span></a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/history" style="color:white;">History</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="page-header">
+            <h1>📊 Your Reading History</h1>
+            <a href="/" class="btn">Discover More</a>
+        </div>
+
+        {% if ratings and ratings|length > 0 %}
+        <div class="stats-cards">
+            <div class="stat-card"><div class="stat-number">{{ ratings|length }}</div><div class="stat-label">Total Ratings</div></div>
+            <div class="stat-card"><div class="stat-number">{{ ratings|selectattr('rating','ge',4)|list|length }}</div><div class="stat-label">📚 Buy</div></div>
+            <div class="stat-card"><div class="stat-number">{{ ratings|selectattr('rating','eq',3)|list|length }}</div><div class="stat-label">🤔 Try</div></div>
+            <div class="stat-card"><div class="stat-number">{{ ratings|selectattr('rating','le',2)|list|length }}</div><div class="stat-label">⏭️ Skip</div></div>
+        </div>
+
+        <div class="history-card">
+            <table class="history-table">
+                <thead><tr><th>Book Title</th><th>Rating</th><th>Recommendation</th><th>Date</th></tr></thead>
+                <tbody>
+                    {% for r in ratings %}
+                    <tr>
+                        <td><span class="book-title">{{ r.book_title }}</span></td>
+                        <td><span class="stars">{% for i in range(r.rating) %}★{% endfor %}{% for i in range(5-r.rating) %}☆{% endfor %}</span></td>
+                        <td>
+                            {% if r.rating >= 4 %}<span class="category-badge badge-buy">BUY</span>
+                            {% elif r.rating == 3 %}<span class="category-badge badge-try">TRY</span>
+                            {% else %}<span class="category-badge badge-skip">SKIP</span>{% endif %}
+                        </td>
+                        <td><span class="date-text">{{ r.timestamp[:10] if r.timestamp else 'Today' }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="history-card">
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <h3>No ratings yet</h3>
+                <p>Start rating books to see your history here!</p>
+                <a href="/" class="btn">Start Exploring</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Back to Home</a>
+    </div>
+</body>
+</html>
